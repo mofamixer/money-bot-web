@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #1c1c1e; color: white; text-align: center; padding: 20px; }
+        .container { width: 100%; max-width: 400px; margin: auto; }
+    </style>
+</head>
+<body>
+    <h2>Статистика трат</h2>
+    <div class="container">
+        <canvas id="myChart"></canvas>
+    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // СЮДА НУЖНО ВСТАВИТЬ ССЫЛКУ ИЗ NGROK
+        const API_URL = "https://ВАША-ССЫЛКА.ngrok-free.app";
+
+        async function loadData() {
+            const userId = tg.initDataUnsafe.user.id;
+            try {
+                const r = await fetch(`${API_URL}/api/stats?user_id=${userId}`);
+                const data = await r.json();
+                
+                new Chart(document.getElementById('myChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            data: data.values,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    },
+                    options: { plugins: { legend: { labels: { color: 'white' } } } }
+                });
+            } catch (e) { alert("Ошибка связи с сервером"); }
+        }
+        loadData();
+    </script>
+</body>
+</html>
