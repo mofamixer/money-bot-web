@@ -7,39 +7,46 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: sans-serif; background: #1c1c1e; color: white; text-align: center; padding: 20px; }
-        .container { width: 100%; max-width: 400px; margin: auto; }
+        .chart-container { position: relative; margin: auto; height: 60vh; width: 80vw; }
     </style>
 </head>
 <body>
-    <h2>Статистика трат</h2>
-    <div class="container">
+    <h3>Статистика за месяц</h3>
+    <div class="chart-container">
         <canvas id="myChart"></canvas>
     </div>
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // СЮДА НУЖНО ВСТАВИТЬ ССЫЛКУ ИЗ NGROK
+        // ССЫЛКА ИЗ NGROK (ОБЯЗАТЕЛЬНО ОБНОВЛЯТЬ ТУТ)
         const API_URL = "https://41b7-5-181-187-176.ngrok-free.app";
 
         async function loadData() {
             const userId = tg.initDataUnsafe.user.id;
             try {
-                const r = await fetch(`${API_URL}/api/stats?user_id=${userId}`);
-                const data = await r.json();
+                const response = await fetch(`${API_URL}/api/stats?user_id=${userId}`);
+                const data = await response.json();
                 
+                if (data.labels.length === 0) {
+                    document.body.innerHTML += "<p>Данных пока нет. Добавьте расходы!</p>";
+                    return;
+                }
+
                 new Chart(document.getElementById('myChart'), {
                     type: 'doughnut',
                     data: {
                         labels: data.labels,
                         datasets: [{
                             data: data.values,
-                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#C9CBCF']
                         }]
                     },
                     options: { plugins: { legend: { labels: { color: 'white' } } } }
                 });
-            } catch (e) { alert("Ошибка связи с сервером"); }
+            } catch (e) {
+                alert("Ошибка связи с сервером. Проверьте Ngrok!");
+            }
         }
         loadData();
     </script>
